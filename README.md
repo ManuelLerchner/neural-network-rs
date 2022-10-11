@@ -15,7 +15,8 @@ Below, you can see a training process, where the network is trying to learn the 
 
 
 ### Learning Animation
-TODO
+https://user-images.githubusercontent.com/54124311/195215663-340eb944-d31d-4f3a-9ad0-ccc4b0835d7e.mp4
+
 
 ### Final Result
 ![RGB_DONUT_S_ 2, 64, 128, 64, 3](https://user-images.githubusercontent.com/54124311/195206882-ab2347eb-d649-4589-a8aa-ca301222ad46.png)
