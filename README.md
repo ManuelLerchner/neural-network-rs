@@ -11,12 +11,11 @@ Below, you can see a training process, where the network is trying to learn the 
 ## Example Training Process
 
 ### Training-Progress
-![RGB_DONUT_S_ 2, 64, 128, 64, 3 _history](https://user-images.githubusercontent.com/54124311/195206824-88ee5c57-baf2-479e-8a69-361d82453ac0.png)
-
+![RGB_DONUT_SGD_ 2,64,64,64,64,64,3 _history](https://user-images.githubusercontent.com/54124311/195409972-a8278be2-4a2b-4bcf-9375-79ab594831ed.png)
 
 ### Learning Animation
-https://user-images.githubusercontent.com/54124311/195215663-340eb944-d31d-4f3a-9ad0-ccc4b0835d7e.mp4
+https://user-images.githubusercontent.com/54124311/195410077-7a02b075-0269-4ff2-965f-97f224ab2cf1.mp4
 
 
 ### Final Result
-![RGB_DONUT_S_ 2, 64, 128, 64, 3](https://user-images.githubusercontent.com/54124311/195206882-ab2347eb-d649-4589-a8aa-ca301222ad46.png)
+![RGB_DONUT_SGD_ 2,64,64,64,64,64,3](https://user-images.githubusercontent.com/54124311/195409668-7db568af-9232-489b-a149-108d63c8d23a.png)
