@@ -1,8 +1,8 @@
 use ndarray::Array;
 
 pub struct ActivationFunction {
-    f: fn(f64) -> f64,
-    d: fn(f64) -> f64,
+    pub f: fn(f64) -> f64,
+    pub d: fn(f64) -> f64,
 }
 
 impl ActivationFunction {
@@ -21,36 +21,9 @@ impl ActivationFunction {
     }
 }
 
-pub static SIGMOID: ActivationFunction = ActivationFunction {
-    f: |x| {
-        if x > 45.0 {
-            1.0
-        } else if x < -45.0 {
-            0.0
-        } else {
-            1.0 / (1.0 + (-x).exp())
-        }
-    },
-
-    d: |x| {
-        let x = (SIGMOID.f)(x);
-        x * (1.0 - x)
-    },
-};
-
-pub static RELU: ActivationFunction = ActivationFunction {
-    f: (|x: f64| x.max(0.0)),
-    d: (|x: f64| if x > 0.0 { 1.0 } else { 0.0 }),
-};
-
-pub static ID: ActivationFunction = ActivationFunction {
-    f: (|x: f64| x),
-    d: (|_x: f64| 1.0),
-};
-
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::activation_function::{RELU, SIGMOID};
 
     #[test]
     fn test_relu_simple() {

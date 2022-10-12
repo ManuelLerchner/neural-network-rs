@@ -1,16 +1,18 @@
-use super::layer::Layer;
+pub mod layer;
+
 use crate::{
     activation_function::activation_function::ActivationFunction,
-    cost_function::cost_function::CostFunction, data::data::Dataset,
+    cost_function::cost_function::CostFunction, data::dataset::Dataset, optimizer::Optimizer,
 };
 
-use itertools::izip;
 use ndarray::Array2;
+
+use self::layer::Layer;
 
 pub struct Network<'a> {
     pub layers: Vec<Layer<'a>>,
+    optimizer: &'a mut dyn Optimizer,
     pub shape: &'a [usize],
-    pub eta: f64,
     pub cost_function: &'a CostFunction,
 }
 
@@ -18,7 +20,7 @@ pub struct Network<'a> {
 impl Network<'_> {
     pub fn new<'a>(
         shape: &'a [usize],
-        eta: f64,
+        optimizer: &'a mut dyn Optimizer,
         activation_function: &'a ActivationFunction,
         cost_function: &'a CostFunction,
     ) -> Network<'a> {
@@ -26,10 +28,13 @@ impl Network<'_> {
         for i in 0..shape.len() - 1 {
             layers.push(Layer::new(shape[i], shape[i + 1], &activation_function));
         }
+
+        optimizer.initialize(&layers);
+
         Network {
             layers,
+            optimizer,
             shape,
-            eta,
             cost_function,
         }
     }
@@ -49,8 +54,8 @@ impl Network<'_> {
         X: &Array2<f64>,
         y: &Array2<f64>,
     ) -> (Vec<Array2<f64>>, Vec<Array2<f64>>) {
-        let mut nabla_b = Vec::new();
-        let mut nabla_w = Vec::new();
+        let mut nabla_bs = Vec::new();
+        let mut nabla_ws = Vec::new();
 
         // Forward pass
         let mut activation = X.clone();
@@ -75,8 +80,8 @@ impl Network<'_> {
         let mut delta = nabla_c * sig_prime;
 
         // Calculate nabla_b and nabla_w for last layer
-        nabla_b.push(delta.clone());
-        nabla_w.push((&activations[activations.len() - 2]).t().dot(&delta));
+        nabla_bs.push(delta.clone());
+        nabla_ws.push((&activations[activations.len() - 2]).t().dot(&delta));
 
         // Loop backwards through the layers, calculating delta, nabla_b and nabla_w
         for i in 2..self.shape.len() {
@@ -88,32 +93,37 @@ impl Network<'_> {
 
             delta = nabla_c * sig_prime;
 
-            nabla_b.push(delta.clone());
-            nabla_w.push((&activations[activations.len() - i - 1].t()).dot(&delta));
+            nabla_bs.push(delta.clone());
+            nabla_ws.push((&activations[activations.len() - i - 1].t()).dot(&delta));
         }
 
-        nabla_b.reverse();
-        nabla_w.reverse();
+        // restore correct ordering
+        nabla_bs.reverse();
+        nabla_ws.reverse();
 
-        (nabla_b, nabla_w)
+        // collect all bias adjustments for the given batch into a single vector
+        for nabla_b in &mut nabla_bs {
+            *nabla_b = nabla_b
+                .sum_axis(ndarray::Axis(0))
+                .into_shape((1, nabla_b.ncols()))
+                .unwrap();
+        }
+
+        (nabla_bs, nabla_ws)
     }
 
     // Trains the network using a minibatch
     pub fn train_minibatch(&mut self, (X, y): &(Array2<f64>, Array2<f64>)) {
-        let (nabla_b, nabla_w) = self.backprop(X, y);
+        let (nabla_bs, nabla_ws) = self.backprop(X, y);
 
-        let batch_size = X.nrows() as f64;
+        let batch_size = X.nrows();
 
-        for (layer, nabla_b, nabla_w) in izip!(&mut self.layers, nabla_b, nabla_w) {
-            let nabla_b_average = &nabla_b
-                .mean_axis(ndarray::Axis(0))
-                .unwrap()
-                .into_shape((1, nabla_b.ncols()))
-                .unwrap();
+        self.optimizer.pre_update();
 
-            layer.weights = &layer.weights - (self.eta / batch_size) * nabla_w;
-            layer.biases = &layer.biases - (self.eta / batch_size) * nabla_b_average;
-        }
+        self.optimizer
+            .update_params(&mut self.layers, batch_size, &nabla_bs, &nabla_ws);
+
+        self.optimizer.post_update();
     }
 
     // Trains the network using a dataset, records the cost for each epoch
@@ -171,6 +181,6 @@ pub trait Summary {
 
 impl Summary for Network<'_> {
     fn summerize(&self) -> String {
-        format!("S_{:?}", self.shape)
+        format!("{}_{:?}", self.optimizer.summerize(), self.shape).replace(" ", "")
     }
 }

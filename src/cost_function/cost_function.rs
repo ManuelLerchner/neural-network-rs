@@ -1,8 +1,8 @@
 use ndarray::{Array1, Array2};
 
 pub struct CostFunction {
-    f: fn(&Array1<f64>, &Array1<f64>) -> f64,
-    d: fn(&Array1<f64>, &Array1<f64>) -> Array1<f64>,
+    pub f: fn(&Array1<f64>, &Array1<f64>) -> f64,
+    pub d: fn(&Array1<f64>, &Array1<f64>) -> Array1<f64>,
 }
 
 impl CostFunction {
@@ -27,16 +27,11 @@ impl CostFunction {
     }
 }
 
-pub static QUADRATIC_COST: CostFunction = CostFunction {
-    f: (|a, expected| (a - expected).iter().fold(0.0, |acc, x| acc + x.powi(2)) / 2.0),
-    d: (|a, expected| a - expected),
-};
-
 #[cfg(test)]
 mod tests {
     use ndarray::{arr1, arr2};
 
-    use super::*;
+    use crate::cost_function::QUADRATIC_COST;
 
     #[test]
     fn test_quadratic_cost() {
