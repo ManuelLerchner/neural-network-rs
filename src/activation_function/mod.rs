@@ -24,7 +24,7 @@ pub static RELU: ActivationFunction = ActivationFunction {
     d: (|x: f64| if x > 0.0 { 1.0 } else { 0.0 }),
 };
 
-pub static ID: ActivationFunction = ActivationFunction {
+pub static LINEAR: ActivationFunction = ActivationFunction {
     f: (|x: f64| x),
     d: (|_x: f64| 1.0),
 };

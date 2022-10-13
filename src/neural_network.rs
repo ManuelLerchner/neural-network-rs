@@ -12,21 +12,22 @@ use self::layer::Layer;
 pub struct Network<'a> {
     pub layers: Vec<Layer<'a>>,
     optimizer: &'a mut dyn Optimizer,
-    pub shape: &'a [usize],
+    pub shape: &'a [(&'a ActivationFunction, usize)],
     pub cost_function: &'a CostFunction,
 }
 
 #[allow(non_snake_case)]
 impl Network<'_> {
     pub fn new<'a>(
-        shape: &'a [usize],
+        shape: &'a [(&ActivationFunction, usize)],
         optimizer: &'a mut dyn Optimizer,
-        activation_function: &'a ActivationFunction,
         cost_function: &'a CostFunction,
     ) -> Network<'a> {
         let mut layers = Vec::new();
         for i in 0..shape.len() - 1 {
-            layers.push(Layer::new(shape[i], shape[i + 1], &activation_function));
+            let (activation_function, input_size) = shape[i];
+            let (_, output_size) = shape[i + 1];
+            layers.push(Layer::new(input_size, output_size, activation_function));
         }
 
         optimizer.initialize(&layers);
@@ -181,6 +182,8 @@ pub trait Summary {
 
 impl Summary for Network<'_> {
     fn summerize(&self) -> String {
-        format!("{}_{:?}", self.optimizer.summerize(), self.shape).replace(" ", "")
+        let shape = self.shape.iter().map(|x| x.1).collect::<Vec<_>>();
+
+        format!("{}_{:?}", self.optimizer.summerize(), shape).replace(" ", "")
     }
 }
