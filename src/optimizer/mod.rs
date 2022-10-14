@@ -1,3 +1,5 @@
+pub mod adam_optimizer;
+pub mod rmsprop_optimizer;
 pub mod sgd_optimzer;
 
 use ndarray::Array2;
@@ -8,7 +10,6 @@ pub trait Optimizer: Summary {
     fn update_params(
         &mut self,
         layers: &mut Vec<Layer>,
-        batch_size: usize,
         nabla_bs: &Vec<Array2<f64>>,
         nabla_ws: &Vec<Array2<f64>>,
     );

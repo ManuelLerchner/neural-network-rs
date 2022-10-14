@@ -1,7 +1,7 @@
 use plotters::prelude::*;
 
 pub fn plot_graph(name: String, data: &Vec<(i32, f64)>) -> Result<(), Box<dyn std::error::Error>> {
-    let path_name = format!("images/{}.png", name);
+    let path_name = format!("images/{}_history.png", name);
 
     let root = BitMapBackend::new(&path_name, (640, 480)).into_drawing_area();
     root.fill(&WHITE)?;
@@ -14,7 +14,7 @@ pub fn plot_graph(name: String, data: &Vec<(i32, f64)>) -> Result<(), Box<dyn st
         .unwrap();
 
     let mut chart = ChartBuilder::on(&root)
-        .caption("Cost-History", ("sans-serif", 50).into_font())
+        .caption("History-".to_owned() + &name, ("sans-serif", 24).into_font())
         .margin(5)
         .x_label_area_size(30)
         .y_label_area_size(60)

@@ -102,12 +102,16 @@ impl Network<'_> {
         nabla_bs.reverse();
         nabla_ws.reverse();
 
-        // collect all bias adjustments for the given batch into a single vector
-        for nabla_b in &mut nabla_bs {
+        //Adjust for batch size
+        let batch_size = X.nrows() as f64;
+        for (nabla_b, nabla_w) in nabla_bs.iter_mut().zip(nabla_ws.iter_mut()) {
             *nabla_b = nabla_b
                 .sum_axis(ndarray::Axis(0))
                 .into_shape((1, nabla_b.ncols()))
                 .unwrap();
+
+            *nabla_b /= batch_size;
+            *nabla_w /= batch_size;
         }
 
         (nabla_bs, nabla_ws)
@@ -117,12 +121,10 @@ impl Network<'_> {
     pub fn train_minibatch(&mut self, (X, y): &(Array2<f64>, Array2<f64>)) {
         let (nabla_bs, nabla_ws) = self.backprop(X, y);
 
-        let batch_size = X.nrows();
-
         self.optimizer.pre_update();
 
         self.optimizer
-            .update_params(&mut self.layers, batch_size, &nabla_bs, &nabla_ws);
+            .update_params(&mut self.layers, &nabla_bs, &nabla_ws);
 
         self.optimizer.post_update();
     }

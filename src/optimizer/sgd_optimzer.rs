@@ -27,22 +27,23 @@ impl SGD {
             biases_momentum: Vec::new(),
         }
     }
+
+    pub fn default() -> SGD {
+        SGD::new(0.1, 0.5, 0.0005)
+    }
 }
 
 impl Optimizer for SGD {
     fn update_params(
         &mut self,
         layers: &mut Vec<Layer>,
-        batch_size: usize,
         nabla_bs: &Vec<Array2<f64>>,
         nabla_ws: &Vec<Array2<f64>>,
     ) {
         for (i, (layer, nabla_b, nabla_w)) in izip!(layers, nabla_bs, nabla_ws).enumerate() {
             //Calculate standart update_params
-            let eta = self.current_learning_rate / batch_size as f64;
-
-            let mut weights_update = -eta * nabla_w;
-            let mut biases_update = -eta * nabla_b;
+            let mut weights_update = -self.current_learning_rate * nabla_w;
+            let mut biases_update = -self.current_learning_rate * nabla_b;
 
             //Add momentum
             if self.momentum > 0.0 {
