@@ -1,6 +1,6 @@
 [package]
 name = "neural-network-rs"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 description = "A neural network library"
 authors = ["Manuel Lerchner"]
@@ -8,7 +8,7 @@ license = "MIT OR Apache-2.0"
 keywords = ["neural-network", "machine-learning"]
 categories = ["science"]
 repository = "https://github.com/ManuelLerchner/neural-network-rs"
-documentation = "https://crates.io/crates/neural-network-rs"
+documentation = "https://docs.rs/crate/neural-network-rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
