@@ -2,6 +2,8 @@ use ndarray::prelude::*;
 use ndarray::{Array, Array2};
 use ndarray_rand::{rand, RandomExt};
 
+pub mod example_datasets;
+
 pub enum DatasetType {
     Static(fn() -> (Array2<f64>, Array2<f64>)),
     Dynamic(fn(Array1<f64>) -> Array1<f64>, (usize, usize)),
@@ -71,4 +73,3 @@ impl Dataset<'_> {
         }
     }
 }
-

@@ -1,8 +1,7 @@
-use crate::activation_function;
-
-use activation_function::activation_function::ActivationFunction;
 use ndarray::Array2;
 use ndarray_rand::{rand_distr::Normal, RandomExt};
+
+use super::activation_function::ActivationFunction;
 
 pub struct Layer<'a> {
     pub weights: Array2<f64>,

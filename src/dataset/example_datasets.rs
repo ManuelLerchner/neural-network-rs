@@ -1,9 +1,8 @@
 use ndarray::array;
 
-use self::dataset::{Dataset, DatasetType};
+use super::{Dataset, DatasetType};
 
-pub mod dataset;
-
+// The XOR dataset: [0, 0] -> 0, [0, 1] -> 1, [1, 0] -> 1, [1, 1] -> 0
 pub static XOR: Dataset = Dataset {
     name: "XOR",
     dataset_type: DatasetType::Static(|| {
@@ -13,6 +12,7 @@ pub static XOR: Dataset = Dataset {
     }),
 };
 
+// The Circle dataset: [x, y] -> 1 if (x-0.5)^2 + (y-0.5)^2 < 0.25, 0 otherwise
 pub static CIRCLE: Dataset = Dataset {
     name: "Circle",
     dataset_type: DatasetType::Dynamic(
@@ -25,6 +25,7 @@ pub static CIRCLE: Dataset = Dataset {
     ),
 };
 
+// The RGB_Test dataset: [x, y] -> [r=x, g=y, b=1-x]
 pub static RGB_TEST: Dataset = Dataset {
     name: "RGB_TEST",
     dataset_type: DatasetType::Dynamic(
@@ -38,6 +39,7 @@ pub static RGB_TEST: Dataset = Dataset {
     ),
 };
 
+// The RGB_DONUT dataset: represents a colorful donut-shape in RGB unit-square
 pub static RGB_DONUT: Dataset = Dataset {
     name: "RGB_DONUT",
     dataset_type: DatasetType::Dynamic(

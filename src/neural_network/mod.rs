@@ -1,13 +1,16 @@
+pub mod activation_function;
+pub mod cost_function;
 pub mod layer;
+pub mod optimizer;
 
-use crate::{
-    activation_function::activation_function::ActivationFunction,
-    cost_function::cost_function::CostFunction, data::dataset::Dataset, optimizer::Optimizer,
-};
+use crate::dataset::Dataset;
 
 use ndarray::Array2;
 
-use self::layer::Layer;
+use self::{
+    activation_function::ActivationFunction, cost_function::CostFunction, layer::Layer,
+    optimizer::Optimizer,
+};
 
 pub struct Network<'a> {
     pub layers: Vec<Layer<'a>>,
