@@ -14,6 +14,7 @@ use crate::{
     plotter::{graph_plotter::plot_graph, png_plotter::plot_png},
 };
 
+#[allow(dead_code)]
 fn main() {
     //Define Network Shape
     let network_shape = [
