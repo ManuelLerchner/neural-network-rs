@@ -15,25 +15,32 @@ use crate::{
 };
 
 fn main() {
-    let network_shape = [(&RELU, 2), (&RELU, 32), (&RELU, 3)];
+    //Define Network Shape
+    let network_shape = [
+        (&RELU, 2),
+        (&RELU, 32),
+        (&RELU, 32),
+        (&RELU, 32),
+        (&RELU, 3),
+    ];
 
-    let mut optimizer = SGD::default();
+    //Define Optimizer
+    let mut optimizer = ADAM::default();
+
+    //Create Network
     let mut network = Network::new(&network_shape, &mut optimizer, &QUADRATIC_COST);
 
+    //Define Dataset
+    let dataset = &RGB_DONUT;
+
     //Train
-    let dataset = &RGB_TEST;
     let cost_history = network.train_and_log(dataset, 128, 512, 10000);
 
-    //Plot
+    //Prepare Plot-data
     let (dim, unit_square_prediction) = network.predict_unit_square(512);
-
     let name = String::from(dataset.name) + "_" + &network.summerize();
-    plot_png(
-        &name,
-        dim,
-        &unit_square_prediction,
-        png::ColorType::Rgb,
-    )
-    .unwrap();
+
+    //Plot
+    plot_png(&name, dim, &unit_square_prediction, png::ColorType::Rgb).unwrap();
     plot_graph(&name, &cost_history).unwrap();
 }
