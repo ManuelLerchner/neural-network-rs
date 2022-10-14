@@ -1,3 +1,5 @@
+![Build-Status](https://github.com/ManuelLerchner/neural-network-rs/actions/workflows/rust.yml/badge.svg)
+[![Rust](https://img.shields.io/badge/rust-1.59.0%2B-blue.svg?maxAge=3600)](https://github.com/rust-lang/regex)
 # Neural-Network
 
 A simple neural network written in rust.
