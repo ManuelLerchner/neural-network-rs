@@ -9,12 +9,12 @@ use crate::neural_network::{layer::Layer, Summary};
 pub trait Optimizer: Summary {
     fn update_params(
         &mut self,
-        layers: &mut Vec<Layer>,
+        layers: &mut Vec<Box<dyn Layer>>,
         nabla_bs: &Vec<Array2<f64>>,
         nabla_ws: &Vec<Array2<f64>>,
     );
 
-    fn initialize(&mut self, layers: &Vec<Layer>);
+    fn initialize(&mut self, layers: &Vec<Box<dyn Layer>>);
 
     fn pre_update(&mut self);
 

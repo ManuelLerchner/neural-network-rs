@@ -36,7 +36,7 @@ impl SGD {
 impl Optimizer for SGD {
     fn update_params(
         &mut self,
-        layers: &mut Vec<Layer>,
+        layers: &mut Vec<Box<dyn Layer>>,
         nabla_bs: &Vec<Array2<f64>>,
         nabla_ws: &Vec<Array2<f64>>,
     ) {
@@ -58,16 +58,17 @@ impl Optimizer for SGD {
             }
 
             //Update weights and biases
-            layer.weights = &layer.weights + weights_update;
-            layer.biases = &layer.biases + biases_update;
+            layer.set_weights(layer.get_weights() + weights_update);
+            layer.set_bias(layer.get_bias() + biases_update);
         }
     }
 
-    fn initialize(&mut self, layers: &Vec<Layer>) {
+    fn initialize(&mut self, layers: &Vec<Box<dyn Layer>>) {
         for layer in layers {
             self.weights_momentum
-                .push(Array2::zeros(layer.weights.dim()));
-            self.biases_momentum.push(Array2::zeros(layer.biases.dim()));
+                .push(Array2::zeros(layer.get_weights().dim()));
+            self.biases_momentum
+                .push(Array2::zeros(layer.get_bias().dim()));
         }
     }
 

@@ -45,8 +45,7 @@ impl ADAM {
 impl Optimizer for ADAM {
     fn update_params(
         &mut self,
-        layers: &mut Vec<Layer>,
-
+        layers: &mut Vec<Box<dyn Layer>>,
         nabla_bs: &Vec<Array2<f64>>,
         nabla_ws: &Vec<Array2<f64>>,
     ) {
@@ -81,18 +80,22 @@ impl Optimizer for ADAM {
                 / (biases_cache_corrected.mapv(f64::sqrt) + self.epsilon);
 
             //updates
-            layer.weights = &layer.weights - &weights_update;
-            layer.biases = &layer.biases - &biases_update;
+
+            layer.set_weights(layer.get_weights() - &weights_update);
+            layer.set_bias(layer.get_bias() - &biases_update);
         }
     }
 
-    fn initialize(&mut self, layers: &Vec<Layer>) {
+    fn initialize(&mut self, layers: &Vec<Box<dyn Layer>>) {
         for layer in layers {
-            self.weights_cache.push(Array2::zeros(layer.weights.dim()));
-            self.biases_cache.push(Array2::zeros(layer.biases.dim()));
+            self.weights_cache
+                .push(Array2::zeros(layer.get_weights().dim()));
+            self.biases_cache
+                .push(Array2::zeros(layer.get_bias().dim()));
             self.weights_momentum
-                .push(Array2::zeros(layer.weights.dim()));
-            self.biases_momentum.push(Array2::zeros(layer.biases.dim()));
+                .push(Array2::zeros(layer.get_weights().dim()));
+            self.biases_momentum
+                .push(Array2::zeros(layer.get_bias().dim()));
         }
     }
 

@@ -2,6 +2,8 @@ pub mod dataset;
 pub mod neural_network;
 pub mod plotter;
 
+use neural_network::layer::{DenseLayer, Layer};
+
 #[allow(unused_imports)]
 use crate::{
     dataset::example_datasets::{CIRCLE, RGB_DONUT, RGB_TEST, XOR},
@@ -17,19 +19,19 @@ use crate::{
 #[allow(dead_code)]
 fn main() {
     //Define Network Shape
-    let network_shape: Vec<(&dyn ActivationFunction, usize)> = vec![
-        (&Relu, 2),
-        (&Relu, 32),
-        (&Relu, 32),
-        (&Relu, 32),
-        (&Relu, 3),
+    let layers: Vec<Box<dyn Layer>> = vec![
+        Box::new(DenseLayer::new(2, &Relu)),
+        Box::new(DenseLayer::new(32, &Relu)),
+        Box::new(DenseLayer::new(32, &Sigmoid)),
+        Box::new(DenseLayer::new(32, &Relu)),
+        Box::new(DenseLayer::new(3, &Linear)),
     ];
 
     //Define Optimizer
     let mut optimizer = ADAM::default();
 
     //Create Network
-    let mut network = Network::new(&network_shape, &mut optimizer, &QuadraticCost);
+    let mut network = Network::new(layers, &mut optimizer, &QuadraticCost);
 
     //Define Dataset
     let dataset = &RGB_DONUT;

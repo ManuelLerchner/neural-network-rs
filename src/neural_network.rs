@@ -7,38 +7,42 @@ use crate::dataset::Dataset;
 
 use ndarray::Array2;
 
-use self::{
-    activation_function::ActivationFunction, cost_function::CostFunction, layer::Layer,
-    optimizer::Optimizer,
-};
+use self::{cost_function::CostFunction, layer::Layer, optimizer::Optimizer};
 
 pub struct Network<'a> {
-    pub layers: Vec<Layer>,
+    input_size: usize,
+    output_size: usize,
+    layers: Vec<Box<dyn Layer>>,
     optimizer: &'a mut dyn Optimizer,
-    pub shape: &'a [(&'static dyn ActivationFunction, usize)],
-    pub cost_function: &'static dyn CostFunction,
+    cost_function: &'static dyn CostFunction,
 }
 
 #[allow(non_snake_case)]
 impl Network<'_> {
     pub fn new<'a>(
-        shape: &'a [(&'static dyn ActivationFunction, usize)],
+        mut layers: Vec<Box<dyn Layer>>,
         optimizer: &'a mut dyn Optimizer,
         cost_function: &'static dyn CostFunction,
     ) -> Network<'a> {
-        let mut layers = Vec::new();
-        for i in 0..shape.len() - 1 {
-            let (activation_function, input_size) = shape[i];
-            let (_, output_size) = shape[i + 1];
-            layers.push(Layer::new(input_size, output_size, activation_function));
+        // Initialize the layers
+        let network_shape = layers.iter().map(|l| l.get_size()).collect::<Vec<_>>();
+
+        //remove last layer
+        layers.pop();
+
+        //initialize the layers
+        for (i, boxedLeyer) in layers.iter_mut().enumerate() {
+            let layer = boxedLeyer.as_mut();
+            layer.initialize(network_shape[i], network_shape[i + 1]);
         }
 
         optimizer.initialize(&layers);
 
         Network {
+            input_size: network_shape[0],
+            output_size: network_shape[network_shape.len() - 1],
             layers,
             optimizer,
-            shape,
             cost_function,
         }
     }
@@ -68,7 +72,7 @@ impl Network<'_> {
         for layer in &self.layers {
             let z = layer.forward(&activation);
             zs.push(z.clone());
-            activation = layer.activation.f_array(&z);
+            activation = layer.get_activation().f_array(&z);
             activations.push(activation.clone());
         }
 
@@ -77,7 +81,7 @@ impl Network<'_> {
 
         // Calculate sensitivity
         let sig_prime = self.layers[self.layers.len() - 1]
-            .activation
+            .get_activation()
             .d_array(&zs[zs.len() - 1]);
 
         // Calculate delta for last layer
@@ -88,12 +92,12 @@ impl Network<'_> {
         nabla_ws.push((&activations[activations.len() - 2]).t().dot(&delta));
 
         // Loop backwards through the layers, calculating delta, nabla_b and nabla_w
-        for i in 2..self.shape.len() {
+        for i in 2..self.layers.len() + 1 {
             let sig_prime = self.layers[self.layers.len() - i]
-                .activation
+                .get_activation()
                 .d_array(&zs[zs.len() - i]);
 
-            let nabla_c = &delta.dot(&self.layers[self.layers.len() - i + 1].weights.t());
+            let nabla_c = &delta.dot(&self.layers[self.layers.len() - i + 1].get_weights().t());
 
             delta = nabla_c * sig_prime;
 
@@ -125,12 +129,12 @@ impl Network<'_> {
         //assert iput shape is the same as the data
         assert_eq!(
             X.ncols(),
-            self.shape[0].1,
+            self.input_size,
             "Input shape does not match data"
         );
         assert_eq!(
             y.ncols(),
-            self.shape[self.shape.len() - 1].1,
+            self.output_size,
             "Output shape does not match data"
         );
 
@@ -199,7 +203,7 @@ pub trait Summary {
 
 impl Summary for Network<'_> {
     fn summerize(&self) -> String {
-        let shape = self.shape.iter().map(|x| x.1).collect::<Vec<_>>();
+        let shape = self.layers.iter().map(|x| x.get_size()).collect::<Vec<_>>();
 
         format!("{}_{:?}", self.optimizer.summerize(), shape).replace(" ", "")
     }
