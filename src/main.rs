@@ -6,8 +6,8 @@ pub mod plotter;
 use crate::{
     dataset::example_datasets::{CIRCLE, RGB_DONUT, RGB_TEST, XOR},
     neural_network::{
-        activation_function::{linear::LINEAR, relu::RELU, sigmoid::SIGMOID},
-        cost_function::quadratic_cost::QUADRATIC_COST,
+        activation_function::{ActivationFunction, Linear, Relu, Sigmoid},
+        cost_function::QuadraticCost,
         optimizer::{adam_optimizer::ADAM, rmsprop_optimizer::RMS_PROP, sgd_optimzer::SGD},
         Network, Summary,
     },
@@ -17,19 +17,19 @@ use crate::{
 #[allow(dead_code)]
 fn main() {
     //Define Network Shape
-    let network_shape = [
-        (&RELU, 2),
-        (&RELU, 32),
-        (&RELU, 32),
-        (&RELU, 32),
-        (&RELU, 3),
+    let network_shape: Vec<(&dyn ActivationFunction, usize)> = vec![
+        (&Relu, 2),
+        (&Relu, 32),
+        (&Relu, 32),
+        (&Relu, 32),
+        (&Relu, 3),
     ];
 
     //Define Optimizer
     let mut optimizer = ADAM::default();
 
     //Create Network
-    let mut network = Network::new(&network_shape, &mut optimizer, &QUADRATIC_COST);
+    let mut network = Network::new(&network_shape, &mut optimizer, &QuadraticCost);
 
     //Define Dataset
     let dataset = &RGB_DONUT;

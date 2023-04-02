@@ -13,18 +13,18 @@ use self::{
 };
 
 pub struct Network<'a> {
-    pub layers: Vec<Layer<'a>>,
+    pub layers: Vec<Layer>,
     optimizer: &'a mut dyn Optimizer,
-    pub shape: &'a [(&'a ActivationFunction, usize)],
-    pub cost_function: &'a CostFunction,
+    pub shape: &'a [(&'static dyn ActivationFunction, usize)],
+    pub cost_function: &'static dyn CostFunction,
 }
 
 #[allow(non_snake_case)]
 impl Network<'_> {
     pub fn new<'a>(
-        shape: &'a [(&ActivationFunction, usize)],
+        shape: &'a [(&'static dyn ActivationFunction, usize)],
         optimizer: &'a mut dyn Optimizer,
-        cost_function: &'a CostFunction,
+        cost_function: &'static dyn CostFunction,
     ) -> Network<'a> {
         let mut layers = Vec::new();
         for i in 0..shape.len() - 1 {
@@ -68,7 +68,7 @@ impl Network<'_> {
         for layer in &self.layers {
             let z = layer.forward(&activation);
             zs.push(z.clone());
-            activation = layer.activation.function(&z);
+            activation = layer.activation.f_array(&z);
             activations.push(activation.clone());
         }
 
@@ -78,7 +78,7 @@ impl Network<'_> {
         // Calculate sensitivity
         let sig_prime = self.layers[self.layers.len() - 1]
             .activation
-            .derivative(&zs[zs.len() - 1]);
+            .d_array(&zs[zs.len() - 1]);
 
         // Calculate delta for last layer
         let mut delta = nabla_c * sig_prime;
@@ -91,7 +91,7 @@ impl Network<'_> {
         for i in 2..self.shape.len() {
             let sig_prime = self.layers[self.layers.len() - i]
                 .activation
-                .derivative(&zs[zs.len() - i]);
+                .d_array(&zs[zs.len() - i]);
 
             let nabla_c = &delta.dot(&self.layers[self.layers.len() - i + 1].weights.t());
 
@@ -122,6 +122,18 @@ impl Network<'_> {
 
     // Trains the network using a minibatch
     pub fn train_minibatch(&mut self, (X, y): &(Array2<f64>, Array2<f64>)) {
+        //assert iput shape is the same as the data
+        assert_eq!(
+            X.ncols(),
+            self.shape[0].1,
+            "Input shape does not match data"
+        );
+        assert_eq!(
+            y.ncols(),
+            self.shape[self.shape.len() - 1].1,
+            "Output shape does not match data"
+        );
+
         let (nabla_bs, nabla_ws) = self.backprop(X, y);
 
         self.optimizer.pre_update();
